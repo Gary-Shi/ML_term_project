@@ -49,7 +49,8 @@ def train(train_loader, model, optimizer, epoch):
         target = target.cuda()
 
         # classification
-        clf_score = model(x.cuda())
+        clf_score, activation = model(x.cuda())
+        model.activation = activation
 
         # update acc
         avg_acc = compute_acc(clf_score, target)
@@ -62,6 +63,10 @@ def train(train_loader, model, optimizer, epoch):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        
+        # spectral norm reg
+        if config.TRAIN.IF_SPECREG:
+            model.module.spec_reg()
 
         # update total clf_loss
         clf_losses.update(loss.item(), total_batch_size)
@@ -109,7 +114,7 @@ def valid(val_loader, model):
             total_batch_size = target.shape[0]
             target = target.cuda()
 
-            clf_score = model(x.cuda())
+            clf_score, _ = model(x.cuda())
 
             # update acc
             avg_acc = compute_acc(clf_score, target)
@@ -166,7 +171,7 @@ def adv_valid(val_loader, model):
             total_batch_size = target.shape[0]
             target = target.cuda()
 
-            clf_score = model(x.cuda())
+            clf_score, _ = model(x.cuda())
 
             # update acc
             avg_acc = compute_acc(clf_score, target)

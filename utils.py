@@ -137,3 +137,45 @@ def get_pert(model, input, target_label = None):
     compute perturbation
     """
     return eval(config.ADV.TYPE)(model, input, target_label)
+
+def power_iteration_init(W, type='Linear', input_size = None, stride=None, padding=None):
+    """
+    initialize u, v in power iteration
+    """
+    if type == 'Linear':
+        v = torch.rand((W.shape[1], 1))
+        u = torch.rand((W.shape[1], 1))
+        _, sigma_gt, __ = torch.svd(W, compute_uv=False)
+        sigma_gt = sigma_gt[0]
+        #print(u.norm(), v.norm(), sigma_gt)
+
+        while torch.abs(v[:, 0].norm() / u[:, 0].norm() - sigma_gt) > 1e-3:
+            # print(u[:, 0].norm(), v[:, 0].norm(), sigma_gt)
+            u = W.mm(v)
+            u = u / u[:, 0].norm()
+            v = W.t().mm(u)
+
+        return u, v
+    elif type == 'Conv':
+        W_prime = torch.flip(W.transpose(0, 1), dims=[2, 3])
+        v = torch.rand([1] + [W.shape[1]] + input_size)
+        u = torch.rand([1] + [W.shape[0]] + input_size)
+        norm_old = -10000
+        
+        while torch.abs(v.view(-1).norm() / u.view(-1).norm() - norm_old) > 1e-3:
+            norm_old = v.view(-1).norm() / u.view(-1).norm()
+            
+            #print(u.view(-1).norm(), v.view(-1).norm())
+            u = F.conv2d(v, W, stride=stride, padding=padding)
+            u = u / u.view(-1).norm()
+            v = F.conv2d(u, W_prime, stride=stride, padding=padding)
+
+        return u[0], v[0]
+        
+
+def conv_to_fc(K):
+    """
+    transform a convolutional kernel into a weight matrix
+    """
+    W = K.view(K.shape[0], -1)
+    return W

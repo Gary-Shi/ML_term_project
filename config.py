@@ -13,8 +13,8 @@ from easydict import EasyDict as edict
 config = edict()
 
 config.MODE = 'train'
-config.GPUS = '4, 5, 6, 7'
-config.GPU_NUM = 4  # number of gpus in config.GPUS
+config.GPUS = '0, 5, 6, 7, 8'
+config.GPU_NUM = 5  # number of gpus in config.GPUS
 config.WORKERS = 4
 
 # Cudnn related params
@@ -30,6 +30,7 @@ config.DATASET = edict()
 config.DATASET.DATASET = 'CIFAR10'
 config.DATASET.ROOT = '/m/shibf/dataset/cifar10'
 config.DATASET.CLASSNUM = 10
+config.DATASET.IMAGESIZE = [32, 32]
 
 # model-related configs
 
@@ -54,9 +55,13 @@ config.TRAIN.END_EPOCH = 120
 config.TRAIN.BATCH_SIZE = 32  # batch_size per gpu
 
 config.TRAIN.IF_L1REG = False  # l1 regularization
-config.TRAIN.IF_CONJREG = True  # conjugate regularization
-config.TRAIN.L1REG = 0
+config.TRAIN.IF_CONJREG = False  # conjugate regularization
+config.TRAIN.IF_SPECREG = True
+config.TRAIN.IF_ACTIVATION_SPECREG = True  # spectral reg with activation considered
+config.TRAIN.L1REG = 5e-5
 config.TRAIN.CONJREG = 1
+config.TRAIN.SPECREG = 0.5
+
 
 config.TRAIN.LR = 0.001
 config.TRAIN.LR_DECAY_RATE = 0.5
@@ -73,7 +78,7 @@ config.TRAIN.PRINT_EVERY = 1
 
 config.TEST = edict()
 
-config.TEST.STATE_DICT = 'model_Conv_raw_0.6657.pth'
+config.TEST.STATE_DICT = 'checkpoint_0.7049.pth'
 config.TEST.TEST_EVERY = 5
 config.TEST.PRINT_EVERY = 1
 
@@ -83,6 +88,7 @@ def extra():
     
     if config.DATASET.DATASET == 'CIFAR10':
         config.DATASET.CLASSNUM = 10
+        config.DATASET.IMAGESIZE = [32, 32]
     
     if config.MODEL.TYPE == 'FCNet':
         config.MODEL.INPUT_DIM = 3 * 32 * 32
