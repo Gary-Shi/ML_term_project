@@ -13,8 +13,8 @@ from easydict import EasyDict as edict
 config = edict()
 
 config.MODE = 'train'
-config.GPUS = '0, 5, 6, 7, 8'
-config.GPU_NUM = 5  # number of gpus in config.GPUS
+config.GPUS = '0, 1, 2, 3'
+config.GPU_NUM = 4  # number of gpus in config.GPUS
 config.WORKERS = 4
 
 # Cudnn related params
@@ -36,7 +36,7 @@ config.DATASET.IMAGESIZE = [32, 32]
 
 config.MODEL = edict()
 
-config.MODEL.TYPE = 'ConvNet'  # FCNet / ConvNet
+config.MODEL.TYPE = 'FCNet'  # FCNet / ConvNet
 config.MODEL.INPUT_DIM = 3 * 32 * 32
 
 # adversary-related configs
